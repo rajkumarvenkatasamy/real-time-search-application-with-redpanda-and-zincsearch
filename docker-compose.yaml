@@ -1,0 +1,45 @@
+---
+version: '3.9'
+services:
+  zincsearch:
+    container_name: zincsearch
+    image: public.ecr.aws/zinclabs/zinc:latest
+    ports:
+    - "4080:4080"
+    environment:
+      ZINC_DATA_PATH: "/data"
+      ZINC_FIRST_ADMIN_USER: "admin"
+      ZINC_FIRST_ADMIN_PASSWORD: "admin"
+    volumes:
+      - ./zincsearch/data:/data # You have to add host's project home directory to Docker Filesharing. Go to Docker Desktop Dashboard -> Settings ->Resources -> FileSharing. Add required folder and hit Apply & Restart.
+    networks:
+      - redpanda-zincsearch-network
+   
+  redpanda:
+    image: vectorized/redpanda
+    container_name: redpanda
+    ports:
+      - "9092:9092"
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp
+      - "1"
+      - --memory
+      - "1G"
+      - --reserve-memory
+      - "0M"
+      - --node-id
+      - "0"
+      - --kafka-addr
+      - PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+      - --advertise-kafka-addr
+      - PLAINTEXT://redpanda:29092,PLAINTEXT_HOST://host.docker.internal:9092
+      - --check=false
+    networks:
+      - redpanda-zincsearch-network
+
+networks:
+  redpanda-zincsearch-network:
+    external: false
