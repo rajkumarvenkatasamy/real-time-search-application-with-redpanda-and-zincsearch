@@ -1,6 +1,6 @@
 from kafka import KafkaConsumer
 from config import TOPIC, BOOTSTRAP_SERVER, GROUP_ID, ZINCSEARCH_SERVER, INDEX
-import base64, json
+import base64
 import requests
 
 
@@ -23,8 +23,6 @@ for message in consumer:
                                          message.offset, message.key.decode("utf-8"),
                                          message.value.decode("utf-8")))
 
-    print(type(message.value))
-    print(type(message.value.decode("utf-8")))
     data = message.value.decode("utf-8")
 
     requests.post(ZINC_URL, headers=headers, data=data)
